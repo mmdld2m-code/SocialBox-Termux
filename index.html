@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>المسعودي للعطور – متجر العطور والبخور الفاخرة</title>
+  <meta name="description" content="المسعودي للعطور – متجر إلكتروني متخصص في بيع العطور والبخور والروائح اليمنية التقليدية">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="site-header"></div>
+
+<!-- SEARCH BAR -->
+<div class="search-section">
+  <div class="search-wrapper">
+    <button class="search-btn" id="searchBtn">🔍 بحث</button>
+    <input type="text" class="search-input" id="searchInput" placeholder="ابحث عن عطر أو بخور...">
+  </div>
+</div>
+
+<!-- MAIN BANNER -->
+<div class="main-banner">
+  <div class="banner-dots"></div>
+  <div class="banner-orbs">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+  </div>
+  <div class="banner-content">
+    <h1>🪔 عطور فاخرة بأصالة يمنية</h1>
+    <p>أجود العطور والبخور من قلب اليمن إلى العالم</p>
+    <a href="store.html" style="display:inline-block; padding:12px 32px; background:linear-gradient(135deg,#D4AF37,#B8960C); color:#0d0d1a; border-radius:30px; font-weight:900; font-size:15px; text-decoration:none; transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+      تسوق الآن ←
+    </a>
+  </div>
+</div>
+
+<!-- CATEGORY TABS -->
+<div style="background:white;">
+  <div class="category-tabs" id="categoryTabs">
+    <button class="cat-tab active" data-cat="all">الكل</button>
+    <button class="cat-tab" data-cat="men">عطور رجالية</button>
+    <button class="cat-tab" data-cat="women">عطور نسائية</button>
+    <button class="cat-tab" data-cat="bakhoor">بخور العوده</button>
+    <button class="cat-tab" data-cat="royal">بخور الملكي</button>
+    <button class="cat-tab" data-cat="fragrances">رائحات</button>
+  </div>
+</div>
+
+<!-- SPECIAL OFFERS SECTION -->
+<div class="special-offers-section">
+  <div class="offers-header">
+    <div class="offers-title">
+      ⭐ عرض خاص ⭐ &nbsp; تخفيضات حصرية للمشتركين
+    </div>
+    <span class="offers-badge">حتى 30% خصم</span>
+  </div>
+
+  <!-- Locked state -->
+  <div id="offersLocked" class="locked-section">
+    <div class="lock-icon">🔒</div>
+    <div class="locked-text">هذا القسم خاص بالمشتركين</div>
+    <div class="locked-sub">سجّل دخولك للاستمتاع بعروض وتخفيضات حصرية</div>
+    <a href="signin.html" class="btn-unlock">سجل الدخول الآن</a>
+  </div>
+
+  <!-- Unlocked state -->
+  <div id="offersUnlocked" class="hidden">
+    <div class="products-grid" id="offersGrid" style="padding:20px;"></div>
+  </div>
+</div>
+
+<!-- PRODUCTS SECTION -->
+<div>
+  <div class="section-header">
+    <div class="section-title" id="sectionTitle">جميع المنتجات</div>
+    <span class="section-badge" id="productCount">23 منتج</span>
+  </div>
+  <div class="products-container">
+    <div class="products-grid" id="productsGrid"></div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div id="site-footer"></div>
+
+<script src="products.js"></script>
+<script src="main.js"></script>
+<script>
+  let currentCat = 'all';
+
+  function renderProducts(cat) {
+    const filtered = cat === 'all' ? products : products.filter(p => p.category === cat);
+    const grid = document.getElementById('productsGrid');
+    grid.innerHTML = filtered.map(p => renderProductCard(p)).join('');
+    document.getElementById('sectionTitle').textContent = categoryNames[cat] || 'المنتجات';
+    document.getElementById('productCount').textContent = filtered.length + ' منتج';
+  }
+
+  function renderOffers() {
+    const discounted = products.filter(p => p.oldPrice).slice(0, 8);
+    const grid = document.getElementById('offersGrid');
+    grid.innerHTML = discounted.map(p => renderProductCard(p)).join('');
+    if (isLoggedIn()) {
+      document.getElementById('offersLocked').classList.add('hidden');
+      document.getElementById('offersUnlocked').classList.remove('hidden');
+    } else {
+      document.getElementById('offersLocked').classList.remove('hidden');
+      document.getElementById('offersUnlocked').classList.add('hidden');
+    }
+  }
+
+  // Category tabs
+  document.getElementById('categoryTabs').addEventListener('click', function(e) {
+    const btn = e.target.closest('.cat-tab');
+    if (!btn) return;
+    document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    currentCat = btn.dataset.cat;
+    renderProducts(currentCat);
+  });
+
+  // Search
+  function doSearch() {
+    const q = document.getElementById('searchInput').value.trim();
+    if (q) window.location.href = 'search-result.html?q=' + encodeURIComponent(q);
+  }
+  document.getElementById('searchBtn').addEventListener('click', doSearch);
+  document.getElementById('searchInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') doSearch();
+  });
+
+  // Init
+  document.addEventListener('DOMContentLoaded', function() {
+    renderProducts('all');
+    renderOffers();
+  });
+</script>
+</body>
+</html>

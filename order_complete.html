@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تم الطلب بنجاح – المسعودي للعطور</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<div style="padding:20px;min-height:60vh;display:flex;align-items:center;justify-content:center;">
+  <div class="order-complete-card">
+    <div class="success-icon">✅</div>
+    <h2 class="success-title">تم استلام طلبك!</h2>
+    <p style="color:#555;font-size:15px;margin-bottom:16px;">شكراً لتسوقك من المسعودي للعطور</p>
+    <div style="background:#f8f5f0;border-radius:10px;padding:16px;margin-bottom:20px;">
+      <p class="order-num">رقم طلبك:</p>
+      <p style="font-size:1.4rem;font-weight:900;color:var(--brown);" id="orderNum">---</p>
+    </div>
+    <p style="font-size:13px;color:#666;margin-bottom:6px;">⏰ سيتم التواصل معك خلال ساعات لتأكيد الطلب</p>
+    <p style="font-size:13px;color:#666;margin-bottom:24px;">📞 للاستفسار: +967 700 000 000</p>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <a href="index.html" style="display:block;padding:12px 28px;background:linear-gradient(135deg,#8B4513,#6B3410);color:white;border-radius:30px;font-weight:700;text-decoration:none;text-align:center;">
+        🏠 العودة للرئيسية
+      </a>
+      <a href="store.html" style="display:block;padding:12px 28px;background:transparent;color:var(--brown);border:1.5px solid var(--brown);border-radius:30px;font-weight:700;text-decoration:none;text-align:center;">
+        🛍️ متابعة التسوق
+      </a>
+    </div>
+  </div>
+</div>
+
+<div id="site-footer"></div>
+
+<script src="js/products.js"></script>
+<script src="js/main.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const orderNum = new URLSearchParams(window.location.search).get('order')
+      || localStorage.getItem('last_order')
+      || 'MSW-' + Math.floor(Math.random() * 999999).toString().padStart(6,'0');
+    document.getElementById('orderNum').textContent = orderNum;
+  });
+</script>
+</body>
+</html>

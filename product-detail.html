@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تفاصيل المنتج – المسعودي للعطور</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<div class="breadcrumb-nav" id="breadcrumb">
+  <a href="index.html">الرئيسية</a> ← <a href="store.html">المتجر</a> ← <span id="breadProduct">المنتج</span>
+</div>
+
+<div class="product-detail-page" id="productDetail">
+  <div style="text-align:center;padding:60px;color:#888;">جاري تحميل المنتج...</div>
+</div>
+
+<!-- Related Products -->
+<div style="padding:0 20px 10px; max-width:1100px;margin:0 auto;">
+  <div class="section-header">
+    <div class="section-title">منتجات مشابهة</div>
+  </div>
+  <div class="products-grid" id="relatedGrid" style="padding-bottom:20px;"></div>
+</div>
+
+<div id="site-footer"></div>
+
+<script src="js/products.js"></script>
+<script src="js/main.js"></script>
+<script>
+  const urlId = parseInt(new URLSearchParams(window.location.search).get('id'));
+  const product = products.find(p => p.id === urlId);
+
+  function renderDetail() {
+    const container = document.getElementById('productDetail');
+    if (!product) {
+      container.innerHTML = '<div style="text-align:center;padding:60px;"><h3>المنتج غير موجود</h3><a href="store.html" style="color:var(--brown);">العودة للمتجر</a></div>';
+      return;
+    }
+
+    document.title = product.name + ' – المسعودي للعطور';
+    document.getElementById('breadProduct').textContent = product.name;
+    const discount = calcDiscount(product.price, product.oldPrice);
+    const catCls = categoryClass[product.category] || '';
+
+    // تحديد مصدر الصورة مع object-fit:cover
+    const imageHtml = product.image 
+      ? `<img src="${product.image}" alt="${product.name}" style="width:100%;height:100%;object-fit:cover;">` 
+      : product.emoji;
+
+    container.innerHTML = `
+      <div class="product-detail-card">
+        <div class="product-detail-img ${catCls}" style="font-size:8rem;display:flex;align-items:center;justify-content:center;height:350px;border-radius:12px;overflow:hidden;">
+          ${imageHtml}
+        </div>
+        <div>
+          ${discount > 0 ? `<span style="background:var(--red);color:white;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:900;">خصم ${discount}%</span><br><br>` : ''}
+          <h1 class="product-detail-name">${product.name}</h1>
+          <div class="product-detail-price">${formatPrice(product.price)}</div>
+          ${product.oldPrice ? `<div class="product-detail-old">السعر الأصلي: ${formatPrice(product.oldPrice)}</div>` : ''}
+          <p class="product-detail-desc">${product.desc || 'منتج فاخر من المسعودي للعطور'}</p>
+          <div class="size-options">
+            <label>حجم العبوة:</label>
+            <div class="size-btns">
+              <button class="size-btn active">25 مل</button>
+              <button class="size-btn">50 مل</button>
+              <button class="size-btn">100 مل</button>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+            <label style="font-size:13px;font-weight:600;">الكمية:</label>
+            <div class="qty-control">
+              <button class="qty-btn" id="qtyMinus">−</button>
+              <span class="qty-num" id="qtyDisplay">1</span>
+              <button class="qty-btn" id="qtyPlus">+</button>
+            </div>
+          </div>
+          <button class="btn-add-cart" id="addCartBtn" style="max-width:280px;padding:13px 20px;font-size:15px;">
+            🛒 أضف إلى السلة
+          </button>
+          <div style="margin-top:16px;display:flex;gap:10px;">
+            <a href="store.html" style="color:var(--brown);font-size:13px;">← العودة للمتجر</a>
+            <span style="color:#ddd;">|</span>
+            <a href="cart.html" style="color:var(--brown);font-size:13px;">عرض السلة 🛒</a>
+          </div>
+          <div style="margin-top:20px;padding:14px;background:#f8f5f0;border-radius:8px;font-size:13px;color:#666;">
+            <strong style="color:var(--brown);">🚚 التوصيل:</strong> متاح لجميع محافظات اليمن<br>
+            <strong style="color:var(--brown);">💳 الدفع:</strong> نقداً عند الاستلام أو تحويل بنكي<br>
+            <strong style="color:var(--brown);">↩️ الإرجاع:</strong> خلال 7 أيام من الاستلام
+          </div>
+        </div>
+      </div>`;
+
+    // Qty controls
+    let qty = 1;
+    document.getElementById('qtyPlus').onclick = () => { qty++; document.getElementById('qtyDisplay').textContent = qty; };
+    document.getElementById('qtyMinus').onclick = () => { if(qty > 1) { qty--; document.getElementById('qtyDisplay').textContent = qty; } };
+    document.getElementById('addCartBtn').onclick = () => {
+      addToCart(product.id, qty);
+      document.getElementById('addCartBtn').textContent = '✓ أُضيف للسلة';
+      document.getElementById('addCartBtn').classList.add('added');
+      setTimeout(() => {
+        document.getElementById('addCartBtn').textContent = '🛒 أضف إلى السلة';
+        document.getElementById('addCartBtn').classList.remove('added');
+      }, 2000);
+    };
+
+    // Size buttons
+    document.querySelectorAll('.size-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // Related products
+    const related = products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
+    document.getElementById('relatedGrid').innerHTML = related.map(p => renderProductCard(p)).join('');
+  }
+
+  document.addEventListener('DOMContentLoaded', renderDetail);
+</script>
+</body>
+</html>

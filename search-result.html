@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نتائج البحث – المسعودي للعطور</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<div class="page-hero">
+  <h1>🔍 نتائج البحث</h1>
+  <p id="searchHero"></p>
+</div>
+<div class="breadcrumb-nav">
+  <a href="index.html">الرئيسية</a> ← نتائج البحث
+</div>
+
+<!-- SEARCH -->
+<div class="search-section">
+  <div class="search-wrapper">
+    <button class="search-btn" id="searchBtn">🔍 بحث</button>
+    <input type="text" class="search-input" id="searchInput" placeholder="ابحث عن عطر أو بخور...">
+  </div>
+</div>
+
+<div class="search-page">
+  <div class="search-info" id="searchInfo"></div>
+  <div class="products-grid" id="searchGrid"></div>
+  <div id="noResults" class="no-results hidden">
+    <div class="icon">🔍</div>
+    <h3>لا توجد نتائج</h3>
+    <p style="margin:8px 0 20px;">لم نجد منتجات تطابق بحثك</p>
+    <a href="store.html" style="display:inline-block;padding:11px 26px;background:var(--brown);color:white;border-radius:20px;font-weight:700;">تصفح جميع المنتجات</a>
+  </div>
+</div>
+
+<div id="site-footer"></div>
+
+<script src="js/products.js"></script>
+<script src="js/main.js"></script>
+<script>
+  const q = new URLSearchParams(window.location.search).get('q') || '';
+
+  function doSearch(query) {
+    if (!query) return;
+    const q = query.trim().toLowerCase();
+    const results = products.filter(p =>
+      p.name.includes(query) ||
+      (p.desc && p.desc.includes(query)) ||
+      (categoryNames[p.category] && categoryNames[p.category].includes(query))
+    );
+
+    document.getElementById('searchInput').value = query;
+    document.getElementById('searchHero').textContent = 'نتائج البحث عن: "' + query + '"';
+    document.getElementById('searchInfo').innerHTML = results.length > 0
+      ? `وجدنا <strong>${results.length}</strong> نتيجة للبحث عن "<strong>${query}</strong>"`
+      : '';
+
+    if (results.length === 0) {
+      document.getElementById('searchGrid').innerHTML = '';
+      document.getElementById('noResults').classList.remove('hidden');
+    } else {
+      document.getElementById('noResults').classList.add('hidden');
+      document.getElementById('searchGrid').innerHTML = results.map(p => renderProductCard(p)).join('');
+    }
+  }
+
+  document.getElementById('searchBtn').addEventListener('click', function() {
+    const val = document.getElementById('searchInput').value.trim();
+    if (val) {
+      history.pushState({}, '', '?q=' + encodeURIComponent(val));
+      doSearch(val);
+    }
+  });
+  document.getElementById('searchInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      const val = this.value.trim();
+      if (val) {
+        history.pushState({}, '', '?q=' + encodeURIComponent(val));
+        doSearch(val);
+      }
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', function() { doSearch(q); });
+</script>
+</body>
+</html>

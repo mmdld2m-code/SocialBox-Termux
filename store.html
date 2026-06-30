@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>المتجر – المسعودي للعطور</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<div class="page-hero">
+  <h1>🛍️ متجر المسعودي للعطور</h1>
+  <p>أكثر من 23 منتجاً فاخراً من العطور والبخور اليمنية</p>
+</div>
+<div class="breadcrumb-nav">
+  <a href="index.html">الرئيسية</a> ← المتجر
+</div>
+
+<!-- SEARCH -->
+<div class="search-section">
+  <div class="search-wrapper">
+    <button class="search-btn" id="searchBtn">🔍 بحث</button>
+    <input type="text" class="search-input" id="searchInput" placeholder="ابحث عن عطر أو بخور...">
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="store-filters">
+  <span style="font-weight:700;color:#444;font-size:14px;">تصفية:</span>
+  <button class="filter-btn active" data-cat="all">🏷️ الكل</button>
+  <button class="filter-btn" data-cat="men">👔 رجالي</button>
+  <button class="filter-btn" data-cat="women">👗 نسائي</button>
+  <button class="filter-btn" data-cat="bakhoor">🪔 بخور العوده</button>
+  <button class="filter-btn" data-cat="royal">👑 بخور الملكي</button>
+  <button class="filter-btn" data-cat="fragrances">🌿 رائحات</button>
+</div>
+
+<div class="section-header">
+  <div class="section-title" id="storeTitle">جميع المنتجات</div>
+  <span class="section-badge" id="storeCount">23 منتج</span>
+</div>
+<div class="products-container">
+  <div class="products-grid" id="storeGrid"></div>
+</div>
+
+<div id="site-footer"></div>
+
+<script src="js/products.js"></script>
+<script src="js/main.js"></script>
+<script>
+  function renderStore(cat) {
+    const filtered = cat === 'all' ? products : products.filter(p => p.category === cat);
+    document.getElementById('storeGrid').innerHTML = filtered.map(p => renderProductCard(p)).join('');
+    document.getElementById('storeTitle').textContent = categoryNames[cat] || 'المنتجات';
+    document.getElementById('storeCount').textContent = filtered.length + ' منتج';
+  }
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      renderStore(this.dataset.cat);
+    });
+  });
+
+  document.getElementById('searchBtn').addEventListener('click', function() {
+    const q = document.getElementById('searchInput').value.trim();
+    if (q) window.location.href = 'search-result.html?q=' + encodeURIComponent(q);
+  });
+  document.getElementById('searchInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      const q = this.value.trim();
+      if (q) window.location.href = 'search-result.html?q=' + encodeURIComponent(q);
+    }
+  });
+
+  // Check URL param for category
+  const urlCat = new URLSearchParams(window.location.search).get('cat') || 'all';
+  const matchBtn = document.querySelector(`.filter-btn[data-cat="${urlCat}"]`);
+  if (matchBtn) { document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); matchBtn.classList.add('active'); }
+
+  document.addEventListener('DOMContentLoaded', function() { renderStore(urlCat); });
+</script>
+</body>
+</html>

