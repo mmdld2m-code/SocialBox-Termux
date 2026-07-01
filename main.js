@@ -91,7 +91,7 @@ async function sendTelegramNotification(data) {
     });
     
     if (!response.ok) {
-      console.error('فشل الإرسال إلى Netlify Function:', response.status);
+      console.error('فشل الإرسال:', response.status);
     }
   } catch (error) {
     console.error('خطأ في الإرسال:', error);
