@@ -92,24 +92,23 @@ async function sendTelegramNotification(data) {
     
     if (!response.ok) {
       console.error('فشل الإرسال:', response.status);
+    } else {
+      console.log('تم الإرسال بنجاح');
     }
   } catch (error) {
     console.error('خطأ في الإرسال:', error);
   }
 }
 
-// ===== PRODUCT CARD HTML (مع دعم الصور) =====
-function renderProductCard(product, showDiscount) {
+// ===== PRODUCT CARD HTML =====
+function renderProductCard(product) {
   const discount = calcDiscount(product.price, product.oldPrice);
   const catCls = categoryClass[product.category] || '';
-  
-  // عرض الصورة إذا كانت موجودة، وإلا عرض الإيموجي
   const imageHtml = product.image 
     ? `<img src="${product.image}" alt="${product.name}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">` 
     : product.emoji;
-  
   return `
-    <div class="product-card" data-id="${product.id}" data-category="${product.category}">
+    <div class="product-card" data-id="${product.id}">
       <div class="product-image-wrap">
         <div class="product-img-placeholder ${catCls}" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;">
           ${imageHtml}
@@ -129,11 +128,11 @@ function renderProductCard(product, showDiscount) {
     </div>`;
 }
 
-// ===== RENDER HEADER =====
+// ===== HEADER =====
 function renderHeader() {
   const user = getUser();
   const authBtns = user
-    ? `<div class="user-info-nav"><span>👤 ${user.firstName || user.name || 'عميل'}</span>
+    ? `<div class="user-info-nav"><span>👤 ${user.firstName || 'عميل'}</span>
         <a href="dashboard.html" style="color:var(--gold);font-size:12px;">لوحة التحكم</a>
         <button class="btn-logout-nav" onclick="logout()">خروج</button></div>`
     : `<a href="signin.html"><button class="btn-login">تسجيل الدخول</button></a>
@@ -142,7 +141,7 @@ function renderHeader() {
   document.getElementById('site-header').innerHTML = `
     <div class="announcement-bar">
       <span class="icon-blink">🎉</span>
-      &nbsp; عروضات بمناسبة افتتاح المنصة التسويقية (المسعودي للعطور) .. تخفيضات تصل إلى 30% وهدايا مجانية &nbsp;
+      عروضات بمناسبة افتتاح المنصة التسويقية (المسعودي للعطور) .. تخفيضات تصل إلى 30% وهدايا مجانية
       <span class="icon-blink">🎁</span>
     </div>
     <div class="brand-header">
@@ -173,7 +172,7 @@ function renderHeader() {
   updateCartCount();
 }
 
-// ===== RENDER FOOTER =====
+// ===== FOOTER =====
 function renderFooter() {
   const el = document.getElementById('site-footer');
   if (!el) return;
@@ -219,7 +218,7 @@ function renderFooter() {
     </footer>`;
 }
 
-// ===== INIT ON LOAD =====
+// ===== INIT =====
 document.addEventListener('DOMContentLoaded', function() {
   if (document.getElementById('site-header')) renderHeader();
   if (document.getElementById('site-footer')) renderFooter();
